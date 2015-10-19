@@ -35,6 +35,9 @@ public class ObjectInspector
 	//inspect the current class
 	inspectFields(obj, ObjClass,objectsToInspect);
 	
+	//check the class name
+	inspectClass(obj, ObjClass, objectsToInspect);
+	
 	if(recursive)
 	    inspectFieldClasses( obj, ObjClass, objectsToInspect, recursive);
 	   
@@ -87,4 +90,23 @@ public class ObjectInspector
 	if(ObjClass.getSuperclass() != null)
 	    inspectFields(obj, ObjClass.getSuperclass() , objectsToInspect);
     }
+    
+    private void inspectClass(Object obj, Class classObject, Vector objsToInspect)
+    {
+    	//Get name of declaring class
+    	Class className = obj.getClass();
+    	System.out.println("Name of declaring class: " + className);
+    	
+    	//Get name of super class
+    	Class superName = classObject.getSuperclass();
+    	System.out.println("Name of super class: " + superName);
+    	
+    	//Get name of interfaces of class that implements them and print them out
+    	Class[] interfaceNames = classObject.getInterfaces();
+    	for(Class classes : interfaceNames)
+    	{
+    		System.out.println("Name of interfaces: " + interfaceNames);
+    	}
+    }
+    
 }
