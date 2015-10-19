@@ -38,6 +38,8 @@ public class ObjectInspector
 	//check the class name
 	inspectClass(obj, ObjClass, objectsToInspect);
 	
+	//Check methods a class declares including the exceptions thrown, parameter and return types, and modifiers
+	inspectMethods(obj, ObjClass, objectsToInspect);
 	if(recursive)
 	    inspectFieldClasses( obj, ObjClass, objectsToInspect, recursive);
 	   
@@ -91,14 +93,16 @@ public class ObjectInspector
 	    inspectFields(obj, ObjClass.getSuperclass() , objectsToInspect);
     }
     
+    
+    
     private void inspectClass(Object obj, Class classObject, Vector objsToInspect)
     {
     	//Get name of declaring class
-    	Class className = obj.getClass();
+    	String className = obj.getClass().getName();
     	System.out.println("Name of declaring class: " + className);
     	
     	//Get name of super class
-    	Class superName = classObject.getSuperclass();
+    	Class<?> superName = classObject.getSuperclass();
     	System.out.println("Name of super class: " + superName);
     	
     	//Get name of interfaces of class that implements them and print them out
@@ -108,5 +112,14 @@ public class ObjectInspector
     		System.out.println("Name of interfaces: " + interfaceNames);
     	}
     }
-    
+	
+	private void inspectMethods(Object obj, Class classObject, Vector objsToInspect)
+    {
+    	Method classMethods[] = classObject.getDeclaredMethods();
+    	for (Method methods : classMethods)
+    	{
+    		
+    		System.out.println("Name of method: " + classMethods);
+    	}
+    }
 }
