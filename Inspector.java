@@ -1,3 +1,4 @@
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Vector;
@@ -19,6 +20,9 @@ public class Inspector {
 	
 	//Check methods a class declares including the exceptions thrown, parameter and return types, and modifiers
 	inspectMethods(obj, ObjClass, objectsToInspect);
+	
+	//Check constructors
+	inspectConstructor(obj, ObjClass, objectsToInspect);
 	//if(recursive)
 	   // inspectFieldClasses( obj, ObjClass, objectsToInspect, recursive);
 	   
@@ -44,15 +48,16 @@ public class Inspector {
 	
 	private void inspectMethods(Object obj, Class classObject, Vector objsToInspect)
     {
+		System.out.println("\n----Inspecting Methods----");
     	Method classMethods[] = classObject.getDeclaredMethods();
     	for (int i = 0; i < classMethods.length; i++)
     	{
-    		System.out.println("\nName of methods: " + classMethods[i].getName());
+    		System.out.println("Name of methods: " + classMethods[i].getName());
     		Class<?>[] exceptions = classMethods[i].getExceptionTypes();
     		Class<?>[] parameters = classMethods[i].getParameterTypes();
     		Class returnType = classMethods[i].getReturnType();
     		int mods = classMethods[i].getModifiers();
-    		String modifiers = Modifier.toString(mods);
+    		String modifier = Modifier.toString(mods);
     		for (int k = 0; k < exceptions.length; k++)
     		{
     			System.out.println("Exception type for " + classMethods[i].getName() + ": " + exceptions[k]);
@@ -61,9 +66,27 @@ public class Inspector {
     		}
     		
     		System.out.println("Return type for " + classMethods[i].getName() + ": " + returnType);
-			System.out.println("Modifiers for " + classMethods[i].getName() + ": " + modifiers);
+			System.out.println("Modifiers for " + classMethods[i].getName() + ": " + modifier + "\n");
     	}
     }
 	
-	
+	private void inspectConstructor(Object obj, Class classObject, Vector objsToInspect)
+	{
+		System.out.println("\n----Inspecting constructor----");
+		Constructor[] constructors = classObject.getConstructors();
+		for (int i = 0; i < constructors.length; i++)
+		{
+			int mods = constructors[i].getModifiers();
+			String modifier = Modifier.toString(mods);
+			System.out.println("Constructor: " + constructors[i]);
+			Class<?>[] constructParameters = constructors[i].getParameterTypes();
+			for (int j = 0; j < constructParameters.length; j++)
+			{
+				System.out.println("Constructor parameter types: " + constructParameters[j]);
+			}
+			
+			System.out.println("Modifiers for " + classObject + ": " + modifier + "\n");
+			
+		}
+	}
 }
