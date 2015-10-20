@@ -1,4 +1,5 @@
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Vector;
@@ -23,6 +24,9 @@ public class Inspector {
 	
 	//Check constructors
 	inspectConstructor(obj, ObjClass, objectsToInspect);
+	
+	//Check fields
+	inspectFields(obj, ObjClass, objectsToInspect, recursive);
 	//if(recursive)
 	   // inspectFieldClasses( obj, ObjClass, objectsToInspect, recursive);
 	   
@@ -78,15 +82,51 @@ public class Inspector {
 		{
 			int mods = constructors[i].getModifiers();
 			String modifier = Modifier.toString(mods);
-			System.out.println("Constructor: " + constructors[i]);
+			System.out.println("Constructor: " + constructors[i].getName());
 			Class<?>[] constructParameters = constructors[i].getParameterTypes();
 			for (int j = 0; j < constructParameters.length; j++)
 			{
 				System.out.println("Constructor parameter types: " + constructParameters[j]);
 			}
 			
-			System.out.println("Modifiers for " + classObject + ": " + modifier + "\n");
+			System.out.println("Modifiers for " + classObject.getName() + ": " + modifier + "\n");
 			
 		}
+	}
+	
+	private void inspectFields(Object obj, Class classObject, Vector objsToInspect, boolean recursive)
+	{
+		//Get field modifiers, type, and name
+		System.out.println("----Inspecting Fields----");
+		Field[] fields = classObject.getDeclaredFields();
+		for (int i = 0; i < fields.length; i++)
+		{
+			int mods = fields[i].getModifiers();
+			String modifier = Modifier.toString(mods);
+			Object object = fields[i].getType();
+			System.out.println("Name of modifier: " + modifier);
+			System.out.println("Name of type: " + object);
+			System.out.println("Name of field: " + fields[i].getName() + "\n");
+		}
+		
+		//Getting field values
+		for (int i = 0; i < fields.length; i++)
+		{
+			Field oneField = classObject.getDeclaredFields()[i];
+			oneField.setAccessible(true);
+			boolean notAPrimitive = classObject.isPrimitive();
+			if(!fields[i].getType().isPrimitive())
+			{
+				try {
+					System.out.println("Field value of " + fields[i].getName() + ": " + oneField.get(obj));
+					System.out.println("Field hash code of " + fields[i].getName() + ": " + obj.hashCode());
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		
 	}
 }
