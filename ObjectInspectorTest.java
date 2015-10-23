@@ -51,6 +51,7 @@ public class ObjectInspectorTest {
 		assertNotEquals("getVal3", classDname[0].getName());
 	}
 	
+	//Test field names
 	@Test
 	public void testFieldName()
 	{
