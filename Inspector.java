@@ -1,7 +1,10 @@
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Enumeration;
 import java.util.Vector;
 
 public class Inspector {
@@ -11,11 +14,8 @@ public class Inspector {
 	Vector objectsToInspect = new Vector();
 	Class ObjClass = obj.getClass();
 	
-	System.out.println("inside inspector: " + obj + " (recursive = "+recursive+")");
-	
-	//inspect the current class
-	//inspectFields(obj, ObjClass,objectsToInspect);
-	
+	System.out.println("  inside inspector: " + obj + " (recursive = "+recursive+")");
+
 	//check the class name
 	inspectClass(obj, ObjClass, objectsToInspect);
 	
@@ -25,13 +25,47 @@ public class Inspector {
 	//Check constructors
 	inspectConstructor(obj, ObjClass, objectsToInspect);
 	
-	//Check fields
-	inspectFields(obj, ObjClass, objectsToInspect, recursive);
-	//if(recursive)
-	   // inspectFieldClasses( obj, ObjClass, objectsToInspect, recursive);
-	   
-   // }
+	//Check fields of the current class
+	System.out.println("----Inspecting Fields----");
+	inspectFields(obj, ObjClass, objectsToInspect);
+	
+	//Check all fields that are an object
+	/*if(recursive == true)
+	{
+	    inspectFieldClasses( obj, ObjClass, objectsToInspect, recursive);
+    }*/
     }
+	
+	private void inspectFieldClasses(Object obj, Class classObject, Vector objsToInspect, boolean recursive)
+	{
+		if(objsToInspect.size() > 0)
+		{
+			Field aField = classObject.getDeclaredFields()[0];//Something wrong here
+			aField.setAccessible(true);
+			Enumeration num = objsToInspect.elements();
+			for (int i = 0; i < objsToInspect.size(); i++)
+			{
+				System.out.println(i);
+			}
+			boolean bool = num.hasMoreElements();
+			while (bool = true)
+			{
+				Field field = (Field) num.nextElement();
+				field.setAccessible(true);
+				System.out.print("\n----Checking contents of " + field.getName() + "----");
+				try {
+					inspect(field.get(obj), recursive);
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+			
+		}
+		
+	}
+	
 	private void inspectClass(Object obj, Class classObject, Vector objsToInspect)
     {
     	//Get name of declaring class
@@ -77,7 +111,7 @@ public class Inspector {
 	private void inspectConstructor(Object obj, Class classObject, Vector objsToInspect)
 	{
 		System.out.println("\n----Inspecting constructor----");
-		Constructor[] constructors = classObject.getConstructors();
+		Constructor[] constructors = classObject.getDeclaredConstructors();
 		for (int i = 0; i < constructors.length; i++)
 		{
 			int mods = constructors[i].getModifiers();
@@ -94,19 +128,45 @@ public class Inspector {
 		}
 	}
 	
-	private void inspectFields(Object obj, Class classObject, Vector objsToInspect, boolean recursive)
+	private void inspectFields(Object obj, Class classObject, Vector objsToInspect)
 	{
 		//Get field modifiers, type, and name
-		System.out.println("----Inspecting Fields----");
+		
 		Field[] fields = classObject.getDeclaredFields();
 		for (int i = 0; i < fields.length; i++)
 		{
+			fields[i].setAccessible(true);
+			
 			int mods = fields[i].getModifiers();
 			String modifier = Modifier.toString(mods);
 			Object object = fields[i].getType();
 			System.out.println("Name of modifier: " + modifier);
 			System.out.println("Name of type: " + object);
 			System.out.println("Name of field: " + fields[i].getName() + "\n");
+			
+			Class aClass = fields[i].getType();
+			if((!fields[i].getType().isPrimitive()) && (aClass.isArray() == true))
+			{
+				Object arrayObject;
+				try {
+					arrayObject = fields[i].get(obj);
+					int arrLength = Array.getLength(arrayObject);
+					System.out.println("Name of array: " + fields[i].getName());
+					System.out.println("Component type of array: " + aClass.getComponentType().getName());
+					System.out.println("Length of array: " + arrLength);
+					for (int j = 0; j < arrLength; j++)
+					{
+						System.out.println("Contents of array:" + Array.get(arrayObject, j));
+					}
+					System.out.println(" ");
+				} catch (IllegalArgumentException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (IllegalAccessException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
 		}
 		
 		//Getting field values
@@ -114,19 +174,29 @@ public class Inspector {
 		{
 			Field oneField = classObject.getDeclaredFields()[i];
 			oneField.setAccessible(true);
-			boolean notAPrimitive = classObject.isPrimitive();
-			if(!fields[i].getType().isPrimitive())
-			{
+			
+			try {
+				System.out.println("\nField value of " + fields[i].getName() + ": " + oneField.get(obj));
+			} catch (IllegalArgumentException e1) {
+				e1.printStackTrace();
+			} catch (IllegalAccessException e1) {
+				e1.printStackTrace();
+			}
 				try {
-					System.out.println("Field value of " + fields[i].getName() + ": " + oneField.get(obj));
+					//Making vector contain elements of objects
+					//objsToInspect.addElement(fields[i]);
+					
 					System.out.println("Field hash code of " + fields[i].getName() + ": " + obj.hashCode());
 				} catch (IllegalArgumentException e) {
 					e.printStackTrace();
-				} catch (IllegalAccessException e) {
-					e.printStackTrace();
 				}
+			//}
+			if(classObject.getSuperclass() != null)
+			{
+				inspectFields(obj, classObject.getSuperclass(), objsToInspect);
 			}
 		}
-		
 	}
+	
+	
 }
